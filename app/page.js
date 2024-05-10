@@ -6,44 +6,41 @@ export default function Home() {
   const [booksData, setBooksData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryName, setCategoryName] = useState('');
-  const [loading, setLoading] = useState(true); 
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     loadCategory();
   }, []);
 
-  const loadCategory = () => {
-    setLoading(true);
-    fetch("https://library-system-f65w.onrender.com/categories/")
-      .then((res) => res.json())
-      .then((data) => {
-        setBooksData([]);
-        setCategoryName('');
-        loadAllBooks();
-      })
-      .catch(error => {
-        console.error('Error loading categories:', error);
-        setLoading(false); 
-      });
+  const loadCategory = async () => {
+    setLoading(true); 
+    try {
+      const res = await fetch("https://library-system-f65w.onrender.com/categories/");
+      const data = await res.json();
+      setBooksData([]);
+      setCategoryName('');
+      await loadAllBooks();
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      setLoading(false);
+    }
   };
 
-  const loadAllBooks = (categoryId) => {
+  const loadAllBooks = async (categoryId) => {
     let url = "https://library-system-f65w.onrender.com/books/";
     if (categoryId) {
       url += `?category=${categoryId}`;
     }
 
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        setBooksData(data);
-        setCategoryName(categoryName || 'All Books');
-        setLoading(false); 
-      })
-      .catch(error => {
-        console.error('Error loading books:', error);
-        setLoading(false);
-      });
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      setBooksData(data);
+      setCategoryName(categoryName || 'All Books');
+      setLoading(false); 
+    } catch (error) {
+      console.error('Error loading books:', error);
+      setLoading(false); 
+    }
   };
 
   const displayBooks = () => {
@@ -64,7 +61,9 @@ export default function Home() {
             <p>No image found</p>
           )}
           <div className="card-body">
-            {/* Book details */}
+            <p>{book.title}</p>
+            <p>{book.author}</p>
+            <p>{book.publication_date}</p>
           </div>
         </div>
       </div>
