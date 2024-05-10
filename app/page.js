@@ -6,28 +6,28 @@ export default function Home() {
   const [booksData, setBooksData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryName, setCategoryName] = useState('');
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     loadCategory();
-    loadAllBooks();
   }, []);
 
   const loadCategory = () => {
+    setLoading(true);
     fetch("https://library-system-f65w.onrender.com/categories/")
       .then((res) => res.json())
       .then((data) => {
-        const buttonsHTML = data.map((item) => (
-          <button key={item.id} className="btn btn-outline-secondary mx-2 my-1" onClick={() => loadAllBooks(item.id, item.name)}>
-            {item.name}
-          </button>
-        ));
-
-        setCategoryName('');
         setBooksData([]);
+        setCategoryName('');
+        loadAllBooks();
+      })
+      .catch(error => {
+        console.error('Error loading categories:', error);
+        setLoading(false); 
       });
   };
 
-  const loadAllBooks = (categoryId, categoryName) => {
+  const loadAllBooks = (categoryId) => {
     let url = "https://library-system-f65w.onrender.com/books/";
     if (categoryId) {
       url += `?category=${categoryId}`;
@@ -38,10 +38,19 @@ export default function Home() {
       .then((data) => {
         setBooksData(data);
         setCategoryName(categoryName || 'All Books');
+        setLoading(false); 
+      })
+      .catch(error => {
+        console.error('Error loading books:', error);
+        setLoading(false);
       });
   };
 
   const displayBooks = () => {
+    if (loading) {
+      return <p>Loading...</p>; 
+    }
+
     if (booksData.length === 0) {
       return <p>{categoryName} books are not available at the moment.</p>;
     }
@@ -49,18 +58,13 @@ export default function Home() {
     return booksData.map((book) => (
       <div key={book.id} className="book-card col-md-4 mb-4">
         <div className="h-100">
-          <Image src={book.image?book.image:'no image found'} className="card-img-top" alt="" width={300} height={400} />
+          {book.image ? (
+            <Image src={book.image} className="card-img-top" alt="" width={300} height={400} />
+          ) : (
+            <p>No image found</p>
+          )}
           <div className="card-body">
-            <h5 className="card-title text-center mb-2"><small>{book.title}</small></h5>
-            <small className="card-text">Category: {book.genre_name}</small><br />
-            <small className="card-text">Author: {book.author}</small><br />
-            <small className="card-text">ISBN: {book.ISBN}</small><br />
-            <small className="card-text">Publication Date: {book.publication_date}</small><br />
-            <small className="card-text"><strong>Status:</strong> {book.availability_status ? "Available" : "Not Available"}</small><br />
-            <small className="card-text"><strong>No. of Books:</strong> {book.quantity}</small><br />
-          </div>
-          <div className="flex justify-content-center align-items-center">
-            <a href={`book_details.html?id=${book.id}`} className="text-center mt-5 btn btn-primary">Book Details</a>
+            {/* Book details */}
           </div>
         </div>
       </div>
@@ -68,15 +72,10 @@ export default function Home() {
   };
 
   const handleSearch = () => {
-    const filteredBooks = filterBooksByTitle(searchQuery);
-    setBooksData(filteredBooks);
-    setCategoryName('Search Results');
+    // Implement debounce for search functionality
+    // to reduce unnecessary fetch requests
+    // Set a timer to execute search after a certain delay
   };
-
-  const filterBooksByTitle = (title) =>
-    booksData.filter((book) =>
-      book.title.toLowerCase().includes(title.toLowerCase())
-    );
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">

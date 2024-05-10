@@ -13,15 +13,11 @@ export default function RootLayout({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // You can add more state variables if needed
 
   useEffect(() => {
-    // Your authentication logic goes here
-
-    // Example: Simulate loading
     setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 5000);
   }, []);
 
   return (
